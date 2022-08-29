@@ -65,13 +65,13 @@ d <- 1:10
 #binding a vector of values (1:10) to name, a. b is referencing a. c is referencing b (and thus, a). a,b,c point to the same address in memory. d is another name for a vector of values (1:10) but has a different address in memory.
 
 The following code accesses the mean function in multiple ways. Do they all point to the same underlying function object? Verify this with lobstr::obj_addr().
-##stuck :( 
+
 ```{r}
-obj_address(mean)
-obj_address(base::mean)
-obj_address(get("mean"))
-obj_address(evalq(mean))
-obj_address(match.fun("mean"))
+obj_addr(mean)
+obj_addr(base::mean)
+obj_addr(get("mean"))
+obj_addr(evalq(mean))
+obj_addr(match.fun("mean"))
 ```
 
 By default, base R data import functions, like read.csv(), will automatically convert non-syntactic names to syntactic ones. Why might this be problematic? What option allows you to suppress this behaviour?
@@ -110,6 +110,7 @@ y[[3]] <- 5L
 
 untracemem(x)
 ```
+#shows change of pointer because objects are immutable, 124 still exists but y no longer points to it
 
 ```{r}
 f <- function(a) {
@@ -191,7 +192,7 @@ tracemem(x)
 
 x[[3]] <- 4
 ```
-#hmm idk :( 
+#changing types 
 
 Sketch out the relationship between the following objects:
 ```{r}
