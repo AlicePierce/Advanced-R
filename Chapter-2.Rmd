@@ -1,0 +1,213 @@
+---
+title: "Chapter 2"
+author: "Alice Pierce"
+date: "8/29/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Given the following data frame, how do I create a new column called “3” that contains the sum of 1 and 2? You may only use $, not [[. What makes 1, 2, and 3 challenging as variable names?
+
+```{r}
+df <- data.frame(runif(3), runif(3))
+names(df) <- c(1, 2)
+#answer
+df$`3` <- df$`1`+df$`2`
+```
+
+In the following code, how much memory does y occupy?
+
+```{r}
+x <- runif(1e6)
+y <- list(x, x, x)
+#24 Mb
+```
+
+On which line does a get copied in the following example?
+```{r}
+a <- c(1, 5, 3, 2)
+b <- a
+b[[1]] <- 10
+#second line
+```
+
+```{r}
+library(lobstr)
+```
+
+```{r}
+x <- c(1, 2, 3)
+y <- x
+obj_addr(x)
+#> [1] "0x7fe11b31b1e8"
+obj_addr(y)
+#> [1] "0x7fe11b31b1e8"
+```
+
+#obj_address allows us to access the object's identifier --> location in memory where the object is stored which is referred to with an identifier. Inr eality, the actual memory addresses changes every time the code is run. 
+#identifiers change every time you restart R
+
+```{r}
+?Reserved
+```
+
+Explain the relationship between a, b, c and d in the following code:
+```{r}
+a <- 1:10
+b <- a
+c <- b
+d <- 1:10
+```
+
+#binding a vector of values (1:10) to name, a. b is referencing a. c is referencing b (and thus, a). a,b,c point to the same address in memory. d is another name for a vector of values (1:10) but has a different address in memory.
+
+The following code accesses the mean function in multiple ways. Do they all point to the same underlying function object? Verify this with lobstr::obj_addr().
+##stuck :( 
+```{r}
+obj_address(mean)
+obj_address(base::mean)
+obj_address(get("mean"))
+obj_address(evalq(mean))
+obj_address(match.fun("mean"))
+```
+
+By default, base R data import functions, like read.csv(), will automatically convert non-syntactic names to syntactic ones. Why might this be problematic? What option allows you to suppress this behaviour?
+#might override base R or functions in libraries
+#idk how to suppress the behavior :( 
+
+What rules does make.names() use to convert non-syntactic names into syntactic ones?
+#uses letters(ASCII), numbers and dot or underline characters. always start with a letter or dot (not followed by number) 
+
+I slightly simplified the rules that govern syntactic names. Why is .123e1 not a syntactic name? Read ?make.names for the full details.
+#dot cannot be followed by number
+
+```{r}
+x <- c(1, 2, 3)
+y <- x
+
+y[[3]] <- 4
+x
+#> [1] 1 2 3
+```
+
+```{r}
+x <- c(1, 2, 3)
+cat(tracemem(x), "\n")
+#> <0x7f80c0e0ffc8> 
+```
+
+```{r}
+y <- x
+y[[3]] <- 4L
+#> tracemem[0x7f80c0e0ffc8 -> 0x7f80c4427f40]: 
+```
+
+```{r}
+y[[3]] <- 5L
+
+untracemem(x)
+```
+
+```{r}
+f <- function(a) {
+  a
+}
+
+x <- c(1, 2, 3)
+cat(tracemem(x), "\n")
+#> <0x7fe1121693a8>
+
+z <- f(x)
+# there's no copy here!
+
+untracemem(x)
+```
+
+```{r}
+l1 <- list(1, 2, 3)
+```
+#lists store references to the values, not the values themselves
+
+```{r}
+l2 <- l1
+l2[[3]] <- 4
+```
+#l2 first two objects reference the same two objects as l1, but they reference a different object on the third pos (3 vs 4)
+
+```{r}
+ref(l1, l2)
+#> █ [1:0x7fe11166c6d8] <list> 
+#> ├─[2:0x7fe11b6d2078] <dbl> 
+#> ├─[3:0x7fe11b6d2040] <dbl> 
+#> └─[4:0x7fe11b6d2008] <dbl> 
+#>  
+#> █ [5:0x7fe11411cc18] <list> 
+#> ├─[2:0x7fe11b6d2078] 
+#> ├─[3:0x7fe11b6d2040] 
+#> └─[6:0x7fe114130a70] <dbl>
+```
+
+```{r}
+d1 <- data.frame(x = c(1, 5, 6), y = c(2, 4, 3))
+```
+
+```{r}
+d2 <- d1
+d2[, 2] <- d2[, 2] * 2
+```
+#If you modify a column, only that column needs to be modified; the others will still point to their original references
+#However, if you modify a row, every column is modified, which means every column must be copied
+
+```{r}
+x <- c("a", "a", "abc", "d")
+```
+
+#R uses a global string pool where each element of a character vector is a pointer to a unique string in the pool
+
+```{r}
+ref(x, character = TRUE)
+#> █ [1:0x7fe114251578] <chr> 
+#> ├─[2:0x7fe10ead1648] <string: "a"> 
+#> ├─[2:0x7fe10ead1648] 
+#> ├─[3:0x7fe11b27d670] <string: "abc"> 
+#> └─[4:0x7fe10eda4170] <string: "d">
+```
+
+Why is tracemem(1:10) not useful?
+
+```{r}
+tracemem(1:10)
+```
+#there's no object to be traced
+
+Explain why tracemem() shows two copies when you run this code. Hint: carefully look at the difference between this code and the code shown earlier in the section.
+
+```{r}
+x <- c(1L, 2L, 3L)
+tracemem(x)
+
+x[[3]] <- 4
+```
+#hmm idk :( 
+
+Sketch out the relationship between the following objects:
+```{r}
+a <- 1:10
+b <- list(a, a)
+c <- list(b, a, 1:10)
+```
+#b points to 2 a
+#c points to b, a, and a object of 1:10
+What happens when you run this code?
+```{r}
+x <- list(1:10)
+x[[2]] <- x
+```
+#x holds a list of reference values of 1:10
+#x now contains 2 lists, and the second list has the same reference values as above
+
+##sorry i could not finish :( 
+
